@@ -30,7 +30,7 @@ namespace APICatalogo.Controllers
         // GET api/<CategoriasController>/5
         [HttpGet("{id:int:min(1)}", Name = "GetCategoria")]
         public ActionResult<Categoria> Get(int id)
-        {
+        {           
             var  categoria = _context.Categorias.AsNoTracking().FirstOrDefault(c => c.Id == id);
             if (categoria is null) return NotFound();
             return Ok(categoria);
