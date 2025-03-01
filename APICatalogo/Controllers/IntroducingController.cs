@@ -1,4 +1,5 @@
-﻿using APICatalogo.Services;
+﻿using APICatalogo.Filters;
+using APICatalogo.Services;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -18,6 +19,7 @@ namespace APICatalogo.Controllers
 
         // GET: api/<CategoriasController>
         [HttpGet]
+        [ServiceFilter(typeof(ApiLoggingFilter))]
         public async Task<ActionResult<string>> Get([FromServices] IMyService _service, string name)
         {
             var introducingMessage = await _service.Introducing("André");
