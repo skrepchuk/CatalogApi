@@ -12,9 +12,9 @@ namespace APICatalogo.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly ICategorieRepository _repository;
+        private readonly IGenericRepository<Category> _repository;
 
-        public CategoriesController(ICategorieRepository repository)
+        public CategoriesController(IGenericRepository<Category> repository)
         {
             _repository = repository;
         }
@@ -32,7 +32,7 @@ namespace APICatalogo.Controllers
         [HttpGet("{id:int:min(1)}", Name = "GetCategoria")]
         public ActionResult<Category> Get(int id)
         {           
-            var  categoria = _repository.GetByIdy(id);
+            var  categoria = _repository.Get(c => c.Id == id);
             if (categoria is null) return NotFound();
             return Ok(categoria);
         }
@@ -59,7 +59,9 @@ namespace APICatalogo.Controllers
         [HttpDelete("{id:int:min(1)}")]
         public ActionResult Delete(int id)
         {
-            var category = _repository.Delete(id);
+            var category = _repository.Get(c => c.Id == id);
+            if (category is null) return NotFound();
+            _repository.Delete(category);
             return Ok();
         }
     }

@@ -29,6 +29,7 @@ builder.Services.AddDbContext<APICatalogContext>(o =>
 
 builder.Services.AddScoped<ApiLoggingFilter>();
 builder.Services.AddTransient<IMyService, MyService>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositoryImpl<>));
 builder.Services.AddScoped<ICategorieRepository, CategoryRepositoryImpl>();
 builder.Services.AddScoped<IProductRepository, ProductRepositoryImpl>();
 var app = builder.Build();

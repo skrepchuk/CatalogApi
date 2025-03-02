@@ -14,52 +14,63 @@ namespace APICatalogo.Controllers
     {
         private readonly IProductRepository _repository;
 
-        public ProductsController(IProductRepository repository)
+
+        public ProductsController( IProductRepository repositoryProduct)
         {
-            _repository = repository;
+            _repository = repositoryProduct;
         }
 
         // GET: api/<ProdutosController>
         [HttpGet]
         public ActionResult<IEnumerable<Product>> Get()
         {
-            var produtos = _repository.GetAll();
-            if (produtos is null) return NotFound();
-            return Ok(produtos);
+            var products = _repository.GetAll();
+            if (products is null) return NotFound();
+            return Ok(products);
+        }
+
+        [HttpGet("ProductsByCategoryId")]
+        public ActionResult<IEnumerable<Product>> GetProductsByCategory(int id)
+        {
+            var products = _repository.GetProductsByCategory(id);
+            if (products is null) return NotFound();
+            return Ok(products);
         }
 
         // GET api/<ProdutosController>/5
         [HttpGet("{id:int:min(1)}", Name="GetProduto")]
         public ActionResult<Product> Get(int id)
         {
-            var produto = _repository.GetByIdy(id);
-            if (produto is null) return NotFound();
-            return Ok(produto);
+            var product = _repository.Get(p => p.Id == id);
+            if (product is null) return NotFound();
+            return Ok(product);
         }
 
         // POST api/<ProdutosController>
         [HttpPost]
-        public ActionResult<Product> Post(Product produto)
+        public ActionResult<Product> Post(Product product)
         {
-            if (produto is null) return BadRequest();
-            _repository.Create(produto);    
-            return new CreatedAtRouteResult("GetProduto", new { id = produto.Id }, produto);
+            if (product is null) return BadRequest();
+            _repository.Create(product);    
+            return new CreatedAtRouteResult("GetProduto", new { id = product.Id }, product);
         }
 
         // PUT api/<ProdutosController>/5
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult<Product> Put(int id, Product produto)
+        public ActionResult<Product> Put(int id, Product product)
         {
-            if(id != produto.Id) return BadRequest();
-            _repository.Update(produto);
-            return Ok(produto);
+            if(id != product.Id) return BadRequest();
+            _repository.Update(product);
+            return Ok(product);
         }
 
         // DELETE api/<ProdutosController>/5
         [HttpDelete("{id:int:min(1)}")]
         public ActionResult Delete(int id)
         {
-            var produto = _repository.Delete(id);
+            var product = _repository.Get(p => p.Id == id);
+            if(product is null) return NotFound();
+            _repository.Delete(product);
             return Ok();
         }
     }
