@@ -30,7 +30,7 @@ builder.Services.AddDbContext<APICatalogContext>(o =>
 builder.Services.AddScoped<ApiLoggingFilter>();
 builder.Services.AddTransient<IMyService, MyService>();
 builder.Services.AddScoped<ICategorieRepository, CategoryRepositoryImpl>();
-
+builder.Services.AddScoped<IProductRepository, ProductRepositoryImpl>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
