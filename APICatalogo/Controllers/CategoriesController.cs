@@ -1,5 +1,6 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Domain;
+using APICatalogo.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,56 +10,48 @@ namespace APICatalogo.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class CategoriasController : ControllerBase
+    public class CategoriesController : ControllerBase
     {
-        private readonly APICatalogContext _context;
+        private readonly ICategorieRepository _repository;
 
-        public CategoriasController(APICatalogContext context)
+        public CategoriesController(ICategorieRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         // GET: api/<CategoriasController>
         [HttpGet]
-        public ActionResult<IEnumerable<Categoria>> Get()
+        public ActionResult<IEnumerable<Category>> Get()
         {
-            var categorias = _context.Categorias.AsNoTracking().ToList();
+            var categorias = _repository.GetAll();
             if (categorias is null) return NotFound();
             return Ok(categorias);
         }
 
         // GET api/<CategoriasController>/5
         [HttpGet("{id:int:min(1)}", Name = "GetCategoria")]
-        public ActionResult<Categoria> Get(int id)
+        public ActionResult<Category> Get(int id)
         {           
-            var  categoria = _context.Categorias.AsNoTracking().FirstOrDefault(c => c.Id == id);
+            var  categoria = _repository.GetByIdy(id);
             if (categoria is null) return NotFound();
             return Ok(categoria);
         }
 
-        [HttpGet("produtos")]
-        public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos() 
-        {
-            return _context.Categorias.Include(p => p.Produtos).AsNoTracking().ToList();
-        }
-
         // POST api/<CategoriasController>
         [HttpPost]
-        public ActionResult<Categoria> Post(Categoria categoria)
+        public ActionResult<Category> Post(Category categoria)
         {
             if (categoria is null) return BadRequest();
-            _context.Categorias.Add(categoria);
-            _context.SaveChanges();
+            _repository.Create(categoria);
             return new CreatedAtRouteResult("GetCategoria", new { id = categoria.Id }, categoria);
         }
 
         // PUT api/<CategoriasController>/5
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult<Categoria> Put(int id, Categoria categoria)
+        public ActionResult<Category> Put(int id, Category categoria)
         {
             if (id != categoria.Id) return BadRequest();
-            _context.Entry(categoria).State = EntityState.Modified;
-            _context.SaveChanges();
+            _repository.Update(categoria);
             return Ok(categoria);
         }
 
@@ -66,10 +59,7 @@ namespace APICatalogo.Controllers
         [HttpDelete("{id:int:min(1)}")]
         public ActionResult Delete(int id)
         {
-            var categoria = _context.Categorias.FirstOrDefault(c => c.Id == id);
-            if (categoria is null) return NotFound();
-            _context.Categorias.Remove(categoria);
-            _context.SaveChanges();
+            var category = _repository.Delete(id);
             return Ok();
         }
     }

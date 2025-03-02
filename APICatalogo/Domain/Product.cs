@@ -6,29 +6,35 @@ using System.Text.Json.Serialization;
 namespace APICatalogo.Domain
 {
     [Table("produtos")]
-    public class Produto
+    public class Product
     {
         [Key]
+        [Column("ProductId")]
         public int Id { get; set; }
         [Required]
         [MaxLength(80)]
         [FirstLetterUppercase]
-        public string? Nome { get; set; }
+        [Column("Name")]
+        public string? Name { get; set; }
         [Required]
         [MaxLength(300)]
-        public string? Descricao { get; set; }
+        [Column("Description")]
+        public string? Description { get; set; }
         [Required]
-        [Column(TypeName="decimal(10,2)")]
+        [Column("Price", TypeName="decimal(10,2)")]
         [Range(1,10000, ErrorMessage = "O preço deve estar enter {1} e {2}")]
-        public decimal Preco { get; set; }
-        public float Estoque { get; set; }
+        public decimal Price { get; set; }
+        public float Stock { get; set; }
         [Required]
         [MaxLength(300)]
         [StringLength(300, MinimumLength = 20, ErrorMessage = "O URL deve conter caracteres com tamanho entre {2} e {1}")]
+        [Column("ImageUrl")]
         public string? ImageUrl { get; set; }
-        public DateTime DataCadastro { get; set; }
-        public int CategoriaId { get; set; }
+        [Column("IssueDate")]
+        public DateTime IssueDate { get; set; }
+        [Column("CategoryId")]
+        public int CategoryId { get; set; }
         [JsonIgnore]
-        public Categoria? Categoria { get; set; }
+        public Category? Category { get; set; }
     }
 }
