@@ -12,18 +12,18 @@ namespace APICatalogo.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly IGenericRepository<Category> _repository;
+        private readonly IUnitOfWork _uow;
 
-        public CategoriesController(IGenericRepository<Category> repository)
+        public CategoriesController(IUnitOfWork uow)
         {
-            _repository = repository;
+            _uow = uow;
         }
 
         // GET: api/<CategoriasController>
         [HttpGet]
         public ActionResult<IEnumerable<Category>> Get()
         {
-            var categorias = _repository.GetAll();
+            var categorias = _uow.CategorieRepository.GetAll();
             if (categorias is null) return NotFound();
             return Ok(categorias);
         }
@@ -32,7 +32,7 @@ namespace APICatalogo.Controllers
         [HttpGet("{id:int:min(1)}", Name = "GetCategoria")]
         public ActionResult<Category> Get(int id)
         {           
-            var  categoria = _repository.Get(c => c.Id == id);
+            var  categoria = _uow.CategorieRepository.Get(c => c.Id == id);
             if (categoria is null) return NotFound();
             return Ok(categoria);
         }
@@ -42,7 +42,8 @@ namespace APICatalogo.Controllers
         public ActionResult<Category> Post(Category categoria)
         {
             if (categoria is null) return BadRequest();
-            _repository.Create(categoria);
+            _uow.CategorieRepository.Create(categoria);
+            _uow.Commit();
             return new CreatedAtRouteResult("GetCategoria", new { id = categoria.Id }, categoria);
         }
 
@@ -51,7 +52,8 @@ namespace APICatalogo.Controllers
         public ActionResult<Category> Put(int id, Category categoria)
         {
             if (id != categoria.Id) return BadRequest();
-            _repository.Update(categoria);
+            _uow.CategorieRepository.Update(categoria);
+            _uow.Commit();
             return Ok(categoria);
         }
 
@@ -59,9 +61,10 @@ namespace APICatalogo.Controllers
         [HttpDelete("{id:int:min(1)}")]
         public ActionResult Delete(int id)
         {
-            var category = _repository.Get(c => c.Id == id);
+            var category = _uow.CategorieRepository.Get(c => c.Id == id);
             if (category is null) return NotFound();
-            _repository.Delete(category);
+            _uow.CategorieRepository.Delete(category);
+            _uow.Commit();
             return Ok();
         }
     }

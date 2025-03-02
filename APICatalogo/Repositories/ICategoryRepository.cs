@@ -2,7 +2,7 @@
 
 namespace APICatalogo.Repositories
 {
-    public interface ICategorieRepository : IGenericRepository<Category>
+    public interface ICategoryRepository : IGenericRepository<Category>
     {
     }
 }

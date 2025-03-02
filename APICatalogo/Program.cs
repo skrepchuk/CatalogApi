@@ -30,8 +30,10 @@ builder.Services.AddDbContext<APICatalogContext>(o =>
 builder.Services.AddScoped<ApiLoggingFilter>();
 builder.Services.AddTransient<IMyService, MyService>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositoryImpl<>));
-builder.Services.AddScoped<ICategorieRepository, CategoryRepositoryImpl>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepositoryImpl>();
 builder.Services.AddScoped<IProductRepository, ProductRepositoryImpl>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWorkImpl>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

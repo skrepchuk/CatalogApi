@@ -12,19 +12,18 @@ namespace APICatalogo.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly IProductRepository _repository;
+        private readonly IUnitOfWork _uow;
 
-
-        public ProductsController( IProductRepository repositoryProduct)
+        public ProductsController(IUnitOfWork uow)
         {
-            _repository = repositoryProduct;
+            _uow = uow;
         }
 
-        // GET: api/<ProdutosController>
+                // GET: api/<ProdutosController>
         [HttpGet]
         public ActionResult<IEnumerable<Product>> Get()
         {
-            var products = _repository.GetAll();
+            var products = _uow.ProductRepository.GetAll();
             if (products is null) return NotFound();
             return Ok(products);
         }
@@ -32,7 +31,7 @@ namespace APICatalogo.Controllers
         [HttpGet("ProductsByCategoryId")]
         public ActionResult<IEnumerable<Product>> GetProductsByCategory(int id)
         {
-            var products = _repository.GetProductsByCategory(id);
+            var products = _uow.ProductRepository.GetProductsByCategory(id);
             if (products is null) return NotFound();
             return Ok(products);
         }
@@ -41,7 +40,7 @@ namespace APICatalogo.Controllers
         [HttpGet("{id:int:min(1)}", Name="GetProduto")]
         public ActionResult<Product> Get(int id)
         {
-            var product = _repository.Get(p => p.Id == id);
+            var product = _uow.ProductRepository.Get(p => p.Id == id);
             if (product is null) return NotFound();
             return Ok(product);
         }
@@ -51,7 +50,8 @@ namespace APICatalogo.Controllers
         public ActionResult<Product> Post(Product product)
         {
             if (product is null) return BadRequest();
-            _repository.Create(product);    
+            _uow.ProductRepository.Create(product);
+            _uow.Commit();
             return new CreatedAtRouteResult("GetProduto", new { id = product.Id }, product);
         }
 
@@ -60,7 +60,8 @@ namespace APICatalogo.Controllers
         public ActionResult<Product> Put(int id, Product product)
         {
             if(id != product.Id) return BadRequest();
-            _repository.Update(product);
+            _uow.ProductRepository.Update(product);
+            _uow.Commit();
             return Ok(product);
         }
 
@@ -68,9 +69,10 @@ namespace APICatalogo.Controllers
         [HttpDelete("{id:int:min(1)}")]
         public ActionResult Delete(int id)
         {
-            var product = _repository.Get(p => p.Id == id);
+            var product = _uow.ProductRepository.Get(p => p.Id == id);
             if(product is null) return NotFound();
-            _repository.Delete(product);
+            _uow.ProductRepository.Delete(product);
+            _uow.Commit();
             return Ok();
         }
     }
