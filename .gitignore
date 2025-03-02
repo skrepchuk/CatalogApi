@@ -1,0 +1,72 @@
+# Ignorar arquivos de build e binários
+[Bb]in/
+[Oo]bj/
+
+# Ignorar pastas de dependências
+[Nn]uget/
+[Pp]ackages/
+
+# Ignorar arquivos de usuário específicos
+*.user
+*.suo
+*.userprefs
+
+# Ignorar arquivos de configuração local
+appsettings.Development.json
+appsettings.Local.json
+
+# Ignorar arquivos de log e diagnóstico
+[Ll]ogs/
+*.log
+*.nlog
+
+# Ignorar arquivos de teste
+[Tt]est[Rr]esults/
+*.TestResults.xml
+
+# Ignorar arquivos de cobertura de código
+[Cc]overage/
+*.coverage
+*.coverage.xml
+
+# Ignorar arquivos de publicação
+[Pp]ublish/
+*.pubxml
+
+# Ignorar arquivos de cache do Visual Studio
+.vs/
+.vscode/
+
+# Ignorar arquivos de Docker
+[Dd]ocker/
+docker-compose.*.yml
+docker-compose.override.yml
+
+# Ignorar arquivos de migração do Entity Framework
+[Mm]igrations/
+*.db
+
+# Ignorar arquivos de ambiente
+.env
+.env.local
+
+# Ignorar arquivos de IDE
+.idea/
+*.swp
+*.swo
+
+# Ignorar arquivos de projeto temporários
+_ReSharper.*
+*.resharper
+
+# Ignorar arquivos de cache do dotnet
+.dotnet/
+.tool/
+
+# Ignorar arquivos de análise estática
+*.ruleset
+*.editorconfig
+
+# Ignorar arquivos de configuração do Rider
+.idea/
+*.iml
