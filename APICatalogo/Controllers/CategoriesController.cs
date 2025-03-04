@@ -2,8 +2,11 @@
 using APICatalogo.Domain;
 using APICatalogo.DTOs;
 using APICatalogo.Repositories;
+using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,10 +17,12 @@ namespace APICatalogo.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
+        private readonly IMapper _mapper;
 
-        public CategoriesController(IUnitOfWork uow)
+        public CategoriesController(IUnitOfWork uow, IMapper mapper)
         {
             _uow = uow;
+            _mapper = mapper;
         }
 
         // GET: api/<categoriesController>
@@ -26,16 +31,7 @@ namespace APICatalogo.Controllers
         {
             var categoriesDomain = _uow.CategorieRepository.GetAll();
             if (categoriesDomain is null) return NotFound();
-            var categoriesDto = new List<CategoryDTO>();
-            foreach (var category in categoriesDomain) {
-                var categoryDTO = new CategoryDTO
-                {
-                    Id = category.Id,
-                    Name = category.Name,
-                    ImageUrl = category.ImageUrl
-                };
-                categoriesDto.Add(categoryDTO);
-            }            
+            var categoriesDto = _mapper.Map <IEnumerable <CategoryDTO>> (categoriesDomain);
             return Ok(categoriesDto);
         }
 
@@ -45,13 +41,8 @@ namespace APICatalogo.Controllers
         {           
             var  category = _uow.CategorieRepository.Get(c => c.Id == id);
             if (category is null) return NotFound();
-            var categoryDTO = new CategoryDTO 
-            { 
-                Id = id,
-                Name = category.Name,
-                ImageUrl = category.ImageUrl   
-            };
-            return Ok(categoryDTO);
+            var categoriesDto = _mapper.Map<CategoryDTO>(category);
+            return Ok(categoriesDto);
         }
 
         // POST api/<categoriesController>
@@ -59,15 +50,12 @@ namespace APICatalogo.Controllers
         public ActionResult<CategoryDTO> Post(CategoryDTO category)
         {
             if (category is null) return BadRequest();
-            var categoryDomain = new Category 
-            { 
-                Id = category.Id, 
-                Name = category.Name, 
-                ImageUrl =category.ImageUrl  
-            };
+            var categoryDomain = _mapper.Map<Category>(category);
             _uow.CategorieRepository.Create(categoryDomain);
             _uow.Commit();
-            return new CreatedAtRouteResult("GetCategory", new { id = category.Id }, category);
+            var createdCategory = _uow.CategorieRepository.Get(c => c.Id == categoryDomain.Id);
+            var createdCategoryDTO = _mapper.Map<CategoryDTO>(createdCategory);
+            return Ok(createdCategoryDTO);
         }
 
         // PUT api/<categoriesController>/5
@@ -75,15 +63,12 @@ namespace APICatalogo.Controllers
         public ActionResult<CategoryDTO> Put(int id, CategoryDTO category)
         {
             if (id != category.Id) return BadRequest();
-            var categoryDomain = new Category
-            {
-                Id = category.Id,
-                Name = category.Name,
-                ImageUrl = category.ImageUrl
-            };
+            var categoryDomain = _mapper.Map<Category>(category);
             _uow.CategorieRepository.Update(categoryDomain);
             _uow.Commit();
-            return Ok(category);
+            var createdCategory = _uow.CategorieRepository.Get(c => c.Id == categoryDomain.Id);
+            var createdCategoryDTO = _mapper.Map<CategoryDTO>(createdCategory);
+            return Ok(createdCategoryDTO);
         }
 
         // DELETE api/<categoriesController>/5
@@ -94,7 +79,8 @@ namespace APICatalogo.Controllers
             if (category is null) return NotFound();
             _uow.CategorieRepository.Delete(category);
             _uow.Commit();
-            return Ok();
+            var deletedCategory = _mapper.Map<CategoryDTO>(category);
+            return Ok(deletedCategory);
         }
     }
 }
