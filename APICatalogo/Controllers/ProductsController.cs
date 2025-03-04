@@ -1,12 +1,11 @@
-﻿using APICatalogo.Context;
-using APICatalogo.Domain;
-using APICatalogo.DTOs;
+﻿using APICatalogo.DTOs;
 using APICatalogo.DTOs.Mappings;
+using APICatalogo.Pagination;
 using APICatalogo.Repositories;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace APICatalogo.Controllers
 {
@@ -15,19 +14,39 @@ namespace APICatalogo.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
+        private readonly IMapper _mapper;
 
-        public ProductsController(IUnitOfWork uow)
+        public ProductsController(IUnitOfWork uow, IMapper mapper)
         {
             _uow = uow;
+            _mapper = mapper;
         }
 
-                // GET: api/<ProdutosController>
         [HttpGet]
         public ActionResult<IEnumerable<ProductDTO>> Get()
         {
             var products = _uow.ProductRepository.GetAll();
             if (products is null) return NotFound();
             return Ok(products);
+        }
+
+        [HttpGet("pagination")]
+        public ActionResult<IEnumerable<ProductDTO>> Get([FromQuery] ProductsPagination pagination)
+        {
+            var products = _uow.ProductRepository.GetProducts(pagination);
+            var metadata = new
+            {
+                products.TotalCount,
+                products.PageSize,
+                products.CurrentPage,
+                products.TotalPages,
+                products.HasNext,
+                products.HasPrevious
+            };
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+            var productsDTO = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            if (productsDTO is null) return NotFound();
+            return Ok(productsDTO);
         }
 
         [HttpGet("ProductsByCategoryId")]
