@@ -29,7 +29,7 @@ namespace APICatalogo.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<CategoryDTO>> Get()
         {
-            var categoriesDomain = _uow.CategorieRepository.GetAll();
+            var categoriesDomain = _uow.CategorieRepository.GetAllAsync();
             if (categoriesDomain is null) return NotFound();
             var categoriesDto = _mapper.Map <IEnumerable <CategoryDTO>> (categoriesDomain);
             return Ok(categoriesDto);
@@ -39,7 +39,7 @@ namespace APICatalogo.Controllers
         [HttpGet("{id:int:min(1)}", Name = "GetCategory")]
         public ActionResult<CategoryDTO> Get(int id)
         {           
-            var  category = _uow.CategorieRepository.Get(c => c.Id == id);
+            var  category = _uow.CategorieRepository.GetAsync(c => c.Id == id);
             if (category is null) return NotFound();
             var categoriesDto = _mapper.Map<CategoryDTO>(category);
             return Ok(categoriesDto);
@@ -52,10 +52,8 @@ namespace APICatalogo.Controllers
             if (category is null) return BadRequest();
             var categoryDomain = _mapper.Map<Category>(category);
             _uow.CategorieRepository.Create(categoryDomain);
-            _uow.Commit();
-            var createdCategory = _uow.CategorieRepository.Get(c => c.Id == categoryDomain.Id);
-            var createdCategoryDTO = _mapper.Map<CategoryDTO>(createdCategory);
-            return Ok(createdCategoryDTO);
+            _uow.CommitAsync();
+            return categoryDTO(categoryDomain);
         }
 
         // PUT api/<categoriesController>/5
@@ -65,22 +63,34 @@ namespace APICatalogo.Controllers
             if (id != category.Id) return BadRequest();
             var categoryDomain = _mapper.Map<Category>(category);
             _uow.CategorieRepository.Update(categoryDomain);
-            _uow.Commit();
-            var createdCategory = _uow.CategorieRepository.Get(c => c.Id == categoryDomain.Id);
+            _uow.CommitAsync();
+            return categoryDTO(categoryDomain);
+        }
+
+        private ActionResult<CategoryDTO> categoryDTO(Category categoryDomain)
+        {
+            var createdCategory = _uow.CategorieRepository.GetAsync(c => c.Id == categoryDomain.Id);
             var createdCategoryDTO = _mapper.Map<CategoryDTO>(createdCategory);
             return Ok(createdCategoryDTO);
         }
 
         // DELETE api/<categoriesController>/5
         [HttpDelete("{id:int:min(1)}")]
-        public ActionResult<CategoryDTO> Delete(int id)
+        public async Task<ActionResult<CategoryDTO>> Delete(int? id)
         {
-            var category = _uow.CategorieRepository.Get(c => c.Id == id);
-            if (category is null) return NotFound();
-            _uow.CategorieRepository.Delete(category);
-            _uow.Commit();
-            var deletedCategory = _mapper.Map<CategoryDTO>(category);
-            return Ok(deletedCategory);
+            if (id.HasValue)
+            {
+                var category = await _uow.CategorieRepository.GetAsync(c => c.Id == id);
+                if (category is null) return NotFound();
+                _uow.CategorieRepository.Delete(category);
+                await _uow.CommitAsync();
+                var deletedCategory = _mapper.Map<CategoryDTO>(category);
+                return Ok(deletedCategory);
+            }
+            else
+            {
+                return BadRequest(); 
+            }
         }
     }
 }

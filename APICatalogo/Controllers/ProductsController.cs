@@ -24,25 +24,25 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<ProductDTO>> Get()
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> Get()
         {
-            var products = _uow.ProductRepository.GetAll();
+            var products = await _uow.ProductRepository.GetAllAsync();
             if (products is null) return NotFound();
             return Ok(products);
         }
 
         [HttpGet("pagination")]
-        public ActionResult<IEnumerable<ProductDTO>> Get([FromQuery] ProductsPagination pagination)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> Get([FromQuery] ProductsPagination pagination)
         {
-            var products = _uow.ProductRepository.GetProducts(pagination);
+            var products = await _uow.ProductRepository.GetProductsAsync(pagination);
             return FilteredPagination(products);
         }
 
 
         [HttpGet("filter/price")]
-        public ActionResult<IEnumerable<ProductDTO>> Get([FromQuery] ProductPriceFilter filter)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> Get([FromQuery] ProductPriceFilter filter)
         {
-            var products = _uow.ProductRepository.GetProducts(filter);
+            var products = await _uow.ProductRepository.GetProductsAsync(filter);
             return FilteredPagination(products);
         }
 
@@ -56,16 +56,16 @@ namespace APICatalogo.Controllers
 
         // GET api/<ProdutosController>/5
         [HttpGet("{id:int:min(1)}", Name="GetProduto")]
-        public ActionResult<ProductDTO> Get(int id)
+        public async Task<ActionResult<ProductDTO>> Get(int id)
         {
-            var product = _uow.ProductRepository.Get(p => p.Id == id);
+            var product = await _uow.ProductRepository.GetAsync(p => p.Id == id);
             if (product is null) return NotFound();
             return Ok(ProductDTOMappingExtensions.ToProductDTO(product));
         }
 
         // POST api/<ProdutosController>
         [HttpPost]
-        public ActionResult<ProductDTO> Post(ProductDTO product)
+        public async Task<ActionResult<ProductDTO>> Post(ProductDTO product)
         {
             if (product is null) return BadRequest();
             if (ProductDTOMappingExtensions.ToProductDomain(product) is null) 
@@ -75,14 +75,14 @@ namespace APICatalogo.Controllers
             else
             {
                 _uow.ProductRepository.Create(ProductDTOMappingExtensions.ToProductDomain(product));
-                _uow.Commit();
+                await _uow.CommitAsync();
                 return new CreatedAtRouteResult("GetProduto", new { id = product.Id });
             }
         }
 
         // PUT api/<ProdutosController>/5
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult<ProductDTO> Put(int id, ProductDTO product)
+        public async Task<ActionResult<ProductDTO>> Put(int id, ProductDTO product)
         {
             if (ProductDTOMappingExtensions.ToProductDomain(product) is null)
             {
@@ -91,19 +91,19 @@ namespace APICatalogo.Controllers
             else
             {
                 _uow.ProductRepository.Update(ProductDTOMappingExtensions.ToProductDomain(product));
-                _uow.Commit();
+                await _uow.CommitAsync();
                 return Ok(product);
             }
         }
 
         // DELETE api/<ProdutosController>/5
         [HttpDelete("{id:int:min(1)}")]
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var product = _uow.ProductRepository.Get(p => p.Id == id);
+            var product = await _uow.ProductRepository.GetAsync(p => p.Id == id);
             if(product is null) return NotFound();
             _uow.ProductRepository.Delete(product);
-            _uow.Commit();
+            await _uow.CommitAsync();
             return Ok();
         }
         private ActionResult<IEnumerable<ProductDTO>> FilteredPagination(PaginatedList<Product> products)
