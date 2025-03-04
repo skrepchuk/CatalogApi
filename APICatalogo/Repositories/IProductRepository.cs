@@ -7,5 +7,7 @@ namespace APICatalogo.Repositories
     {
         IEnumerable<Product> GetProductsByCategory(int id);
         PaginatedList<Product> GetProducts(ProductsPagination pagination);
+        PaginatedList<Product> GetProducts(ProductPriceFilter filter);       
+
     }
 }

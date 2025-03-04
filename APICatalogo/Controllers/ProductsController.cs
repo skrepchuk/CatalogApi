@@ -1,4 +1,5 @@
-﻿using APICatalogo.DTOs;
+﻿using APICatalogo.Domain;
+using APICatalogo.DTOs;
 using APICatalogo.DTOs.Mappings;
 using APICatalogo.Pagination;
 using APICatalogo.Repositories;
@@ -34,19 +35,15 @@ namespace APICatalogo.Controllers
         public ActionResult<IEnumerable<ProductDTO>> Get([FromQuery] ProductsPagination pagination)
         {
             var products = _uow.ProductRepository.GetProducts(pagination);
-            var metadata = new
-            {
-                products.TotalCount,
-                products.PageSize,
-                products.CurrentPage,
-                products.TotalPages,
-                products.HasNext,
-                products.HasPrevious
-            };
-            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
-            var productsDTO = _mapper.Map<IEnumerable<ProductDTO>>(products);
-            if (productsDTO is null) return NotFound();
-            return Ok(productsDTO);
+            return FilteredPagination(products);
+        }
+
+
+        [HttpGet("filter/price")]
+        public ActionResult<IEnumerable<ProductDTO>> Get([FromQuery] ProductPriceFilter filter)
+        {
+            var products = _uow.ProductRepository.GetProducts(filter);
+            return FilteredPagination(products);
         }
 
         [HttpGet("ProductsByCategoryId")]
@@ -108,6 +105,22 @@ namespace APICatalogo.Controllers
             _uow.ProductRepository.Delete(product);
             _uow.Commit();
             return Ok();
+        }
+        private ActionResult<IEnumerable<ProductDTO>> FilteredPagination(PaginatedList<Product> products)
+        {
+            var metadata = new
+            {
+                products.TotalCount,
+                products.PageSize,
+                products.CurrentPage,
+                products.TotalPages,
+                products.HasNext,
+                products.HasPrevious
+            };
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+            var productsDTO = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            if (productsDTO is null) return NotFound();
+            return Ok(productsDTO);
         }
     }
 }
