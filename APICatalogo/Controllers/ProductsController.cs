@@ -1,5 +1,7 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Domain;
+using APICatalogo.DTOs;
+using APICatalogo.DTOs.Mappings;
 using APICatalogo.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +23,7 @@ namespace APICatalogo.Controllers
 
                 // GET: api/<ProdutosController>
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> Get()
+        public ActionResult<IEnumerable<ProductDTO>> Get()
         {
             var products = _uow.ProductRepository.GetAll();
             if (products is null) return NotFound();
@@ -29,40 +31,53 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet("ProductsByCategoryId")]
-        public ActionResult<IEnumerable<Product>> GetProductsByCategory(int id)
+        public ActionResult<IEnumerable<ProductDTO>> GetProductsByCategory(int id)
         {
             var products = _uow.ProductRepository.GetProductsByCategory(id);
-            if (products is null) return NotFound();
-            return Ok(products);
+            if (products is null) return NotFound();            
+            return Ok(ProductDTOMappingExtensions.ToProductDTOList(products));
         }
 
         // GET api/<ProdutosController>/5
         [HttpGet("{id:int:min(1)}", Name="GetProduto")]
-        public ActionResult<Product> Get(int id)
+        public ActionResult<ProductDTO> Get(int id)
         {
             var product = _uow.ProductRepository.Get(p => p.Id == id);
             if (product is null) return NotFound();
-            return Ok(product);
+            return Ok(ProductDTOMappingExtensions.ToProductDTO(product));
         }
 
         // POST api/<ProdutosController>
         [HttpPost]
-        public ActionResult<Product> Post(Product product)
+        public ActionResult<ProductDTO> Post(ProductDTO product)
         {
             if (product is null) return BadRequest();
-            _uow.ProductRepository.Create(product);
-            _uow.Commit();
-            return new CreatedAtRouteResult("GetProduto", new { id = product.Id }, product);
+            if (ProductDTOMappingExtensions.ToProductDomain(product) is null) 
+            {
+                return BadRequest();
+            }
+            else
+            {
+                _uow.ProductRepository.Create(ProductDTOMappingExtensions.ToProductDomain(product));
+                _uow.Commit();
+                return new CreatedAtRouteResult("GetProduto", new { id = product.Id });
+            }
         }
 
         // PUT api/<ProdutosController>/5
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult<Product> Put(int id, Product product)
+        public ActionResult<ProductDTO> Put(int id, ProductDTO product)
         {
-            if(id != product.Id) return BadRequest();
-            _uow.ProductRepository.Update(product);
-            _uow.Commit();
-            return Ok(product);
+            if (ProductDTOMappingExtensions.ToProductDomain(product) is null)
+            {
+                return BadRequest();
+            }
+            else
+            {
+                _uow.ProductRepository.Update(ProductDTOMappingExtensions.ToProductDomain(product));
+                _uow.Commit();
+                return Ok(product);
+            }
         }
 
         // DELETE api/<ProdutosController>/5

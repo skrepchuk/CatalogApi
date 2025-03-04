@@ -1,5 +1,6 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Domain;
+using APICatalogo.DTOs;
 using APICatalogo.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,47 +20,75 @@ namespace APICatalogo.Controllers
             _uow = uow;
         }
 
-        // GET: api/<CategoriasController>
+        // GET: api/<categoriesController>
         [HttpGet]
-        public ActionResult<IEnumerable<Category>> Get()
+        public ActionResult<IEnumerable<CategoryDTO>> Get()
         {
-            var categorias = _uow.CategorieRepository.GetAll();
-            if (categorias is null) return NotFound();
-            return Ok(categorias);
+            var categoriesDomain = _uow.CategorieRepository.GetAll();
+            if (categoriesDomain is null) return NotFound();
+            var categoriesDto = new List<CategoryDTO>();
+            foreach (var category in categoriesDomain) {
+                var categoryDTO = new CategoryDTO
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    ImageUrl = category.ImageUrl
+                };
+                categoriesDto.Add(categoryDTO);
+            }            
+            return Ok(categoriesDto);
         }
 
-        // GET api/<CategoriasController>/5
-        [HttpGet("{id:int:min(1)}", Name = "GetCategoria")]
-        public ActionResult<Category> Get(int id)
+        // GET api/<categoriesController>/5
+        [HttpGet("{id:int:min(1)}", Name = "GetCategory")]
+        public ActionResult<CategoryDTO> Get(int id)
         {           
-            var  categoria = _uow.CategorieRepository.Get(c => c.Id == id);
-            if (categoria is null) return NotFound();
-            return Ok(categoria);
+            var  category = _uow.CategorieRepository.Get(c => c.Id == id);
+            if (category is null) return NotFound();
+            var categoryDTO = new CategoryDTO 
+            { 
+                Id = id,
+                Name = category.Name,
+                ImageUrl = category.ImageUrl   
+            };
+            return Ok(categoryDTO);
         }
 
-        // POST api/<CategoriasController>
+        // POST api/<categoriesController>
         [HttpPost]
-        public ActionResult<Category> Post(Category categoria)
+        public ActionResult<CategoryDTO> Post(CategoryDTO category)
         {
-            if (categoria is null) return BadRequest();
-            _uow.CategorieRepository.Create(categoria);
+            if (category is null) return BadRequest();
+            var categoryDomain = new Category 
+            { 
+                Id = category.Id, 
+                Name = category.Name, 
+                ImageUrl =category.ImageUrl  
+            };
+            _uow.CategorieRepository.Create(categoryDomain);
             _uow.Commit();
-            return new CreatedAtRouteResult("GetCategoria", new { id = categoria.Id }, categoria);
+            return new CreatedAtRouteResult("GetCategory", new { id = category.Id }, category);
         }
 
-        // PUT api/<CategoriasController>/5
+        // PUT api/<categoriesController>/5
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult<Category> Put(int id, Category categoria)
+        public ActionResult<CategoryDTO> Put(int id, CategoryDTO category)
         {
-            if (id != categoria.Id) return BadRequest();
-            _uow.CategorieRepository.Update(categoria);
+            if (id != category.Id) return BadRequest();
+            var categoryDomain = new Category
+            {
+                Id = category.Id,
+                Name = category.Name,
+                ImageUrl = category.ImageUrl
+            };
+            _uow.CategorieRepository.Update(categoryDomain);
             _uow.Commit();
-            return Ok(categoria);
+            return Ok(category);
         }
 
-        // DELETE api/<CategoriasController>/5
+        // DELETE api/<categoriesController>/5
         [HttpDelete("{id:int:min(1)}")]
-        public ActionResult Delete(int id)
+        public ActionResult<CategoryDTO> Delete(int id)
         {
             var category = _uow.CategorieRepository.Get(c => c.Id == id);
             if (category is null) return NotFound();
