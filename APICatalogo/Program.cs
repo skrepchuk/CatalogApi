@@ -6,6 +6,7 @@ using APICatalogo.Repositories;
 using APICatalogo.RepositoryImpl;
 using APICatalogo.Services;
 using APICatalogo.ServicesImpl;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -22,11 +23,16 @@ builder.Services.AddControllers(o =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 var mysqlConnectionString = builder.Configuration.GetConnectionString("APICatalog");
 
 builder.Services.AddDbContext<APICatalogContext>(o =>
     o.UseMySql(mysqlConnectionString,
         ServerVersion.AutoDetect(mysqlConnectionString)));
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+
+    .AddEntityFrameworkStores<APICatalogContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<ApiLoggingFilter>();
 builder.Services.AddTransient<IMyService, MyService>();

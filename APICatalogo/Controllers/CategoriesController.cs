@@ -3,6 +3,7 @@ using APICatalogo.Domain;
 using APICatalogo.DTOs;
 using APICatalogo.Repositories;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,7 @@ namespace APICatalogo.Controllers
 
         // GET: api/<categoriesController>
         [HttpGet]
+        [Authorize]
         public ActionResult<IEnumerable<CategoryDTO>> Get()
         {
             var categoriesDomain = _uow.CategorieRepository.GetAllAsync();
